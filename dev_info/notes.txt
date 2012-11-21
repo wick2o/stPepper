@@ -1,0 +1,19 @@
+sqlite3.exe tastlist.db
+CREATE TABLE todo (id INTEGER PRIMARY KEY, task varchar(255) NOT NULL, status varchar(100));
+
+INSERT INTO todo (task,status) VALUES ('kh.task.000000','open');
+INSERT INTO todo (task,status) VALUES ('kh.task.000003','open');
+INSERT INTO todo (task,status) VALUES ('kh.task.000006','open');
+INSERT INTO todo (task,status) VALUES ('kh.task.000009','open');
+INSERT INTO todo (task,status) VALUES ('kh.task.000001','open');
+INSERT INTO todo (task,status) VALUES ('kh.task.000004','open');
+INSERT INTO todo (task,status) VALUES ('kh.task.000007','open');
+INSERT INTO todo (task,status) VALUES ('kh.task.000010','open');
+INSERT INTO todo (task,status) VALUES ('kh.task.000002','open');
+INSERT INTO todo (task,status) VALUES ('kh.task.000005','open');
+INSERT INTO todo (task,status) VALUES ('kh.task.000008','open');
+
+
+
+
+split -d -a 6 -l 3000 file_to_split tile_to_prefix_task.
