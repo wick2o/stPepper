@@ -41,7 +41,7 @@ def load_ipaddresses():
 	#for ip in ip_read:
 	#	if not ip.startswith('#'): #ignore comments
 	#		ipaddresses.append(ip)
-	res = urllib2.urlopen('http://172.16.1.10:8080/gettask')
+	res = urllib2.urlopen('http://50.17.217.148/gettask')
 	global f_name
 	f_name = res.info()['Content-Disposition'].split('filename=')[1].replace('"','')
 	f_content = res.read()
