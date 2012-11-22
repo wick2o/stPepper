@@ -31,11 +31,17 @@ def do_upload():
     if data is not None:
         raw = data.file.read() # small files =.=
         filename = data.filename
+		# block all /, ../, anything non alphanum
+		if re.search("^[A-Za-z0-9]+\.done$", filename) == None:
+			return "Go away"
         f = open(filename, 'wb')
         f.write(raw)
         f.close()
         conn = sqlite3.connect('tasklist.db')
         c = conn.cursor()
+		if filename.find("'") != -1:
+			c.close()
+			return "Go away"
         c.execute("UPDATE todo SET status = 'finished' where task = '%s'" % (filename.replace('.done','')))
         conn.commit()
         c.close()

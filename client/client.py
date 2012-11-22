@@ -41,9 +41,13 @@ def load_ipaddresses():
 	#for ip in ip_read:
 	#	if not ip.startswith('#'): #ignore comments
 	#		ipaddresses.append(ip)
+	
 	res = urllib2.urlopen('http://50.17.217.148/gettask')
 	global f_name
 	f_name = res.info()['Content-Disposition'].split('filename=')[1].replace('"','')
+	if re.search("^[A-Za-z0-9.]+$", f_name) == None:
+		res.close()
+		return -1
 	f_content = res.read()
 	f = open(f_name, 'wb')
 	f.write(f_content)
@@ -80,7 +84,7 @@ def upload_results():
 	f.close()
 	
 	#Post to server:
-	
+	call(["curl", "-X", "POST", "-T", f_name, , "-F", "name=submit", "http://50.17.217.148/upload?data="
 	#cleanup
 	if os.path.exists(f_name):
 		os.remove(f_name)
