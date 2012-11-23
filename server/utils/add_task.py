@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import os
+import sys
+import argparse
+
+try:
+	import sqlite3
+except ImportError:
+	print 'need some sqlite3 module'
+	sys.exit()
+
+def setup():
+	parser = argparse.ArgumentParser()
+	opt_group = parser.add_mutually_exclusive_group()
+	opt_group.add_argument('-s', '--single', action='store', dest='sfile',  help='Add single file to database')
+	opt_group.add_argument('-f', '--folder', action='store', dest='folder', help='Add all files inside a folder to database')
+	
+	parser.add_argument('-d', '--database', action='store', dest='database', required=True, help='database file')
+	
+	global args
+	args = parser.parse_args()
+	
+def main():
+	setup()
+	if os.path.exists(args.database):
+		db = sqlite3.connect(args.database)
+		c = db.cursor()
+		
+		if args.sfile:
+			if os.path.exists(args.sfile) and os.path.isdir(args.sfile) == False:
+				print "Adding %s..." % (os.path.basename(args.sfile))
+				c.execute("INSERT INTO tasks (task,status) values ('%s','open')" % (os.path.basename(args.sfile)))
+			else:
+				print "File not found..."
+
+
+		if args.folder:
+			if os.path.exists(args.folder) and os.path.isdir(args.folder) == True:
+				for root, dirs, files in os.walk(args.folder):
+					for f in files:
+						print "Adding %s..." % (f)
+						c.execute("INSERT INTO tasks (task,status) values ('%s','open')" % (f))
+			else:
+				print "folder doesnt exist..."
+		
+		db.commit()
+		c.close()
+		sys.exit()
+	else:
+		print "Database not found..."
+		sys.exit()
+
+if __name__ == "__main__":
+	main()

@@ -49,8 +49,12 @@ def logo():
 def request_task():
 	global f_name
 	global valid_chars
-	
-	res = urllib2.urlopen('http://%s/gettask' % (args.server))
+	try:
+		res = urllib2.urlopen('http://%s/gettask/%s' % (args.server,args.user))
+	except:
+		print "No avaiable Tasks..."
+		sys.exit()
+		
 	f_name = res.info()['Content-Disposition'].split('filename=')[1].replace('"','')
 	t_name = ''.join(c for c in f_name if c in valid_chars)
 	
@@ -144,6 +148,8 @@ def process_handler(ipaddresses):
 	else:
 		for ip in ipaddresses:
 			run_process(ip)
+			if sigint == True:
+				signal_handler('','')
 	return
 
 
@@ -155,9 +161,15 @@ def signal_handler(signal, frame):
 		
 	print ' Ctrl+C detected... exiting...\n'
 	
+	try:
+		res = urllib2.urlopen('http://%s/cancelme/%s' % (args.server,f_name))
+	except:
+		pass
+	
 	# cleanup from canceled task
 	if os.path.exists(f_name):
 		os.remove(f_name)
+		
 	
 	sys.exit(1)
 

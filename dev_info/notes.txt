@@ -1,5 +1,5 @@
 sqlite3.exe tastlist.db
-CREATE TABLE todo (id INTEGER PRIMARY KEY, task varchar(255) NOT NULL, status varchar(100));
+CREATE TABLE tasks (id INTEGER PRIMARY KEY, task varchar(255) NOT NULL, user varchar(100), status varchar(100));
 
  sqlite3 -line mydata.db 'select * from memos where priority > 20;'
  
@@ -25,3 +25,6 @@ INSERT INTO todo (task,status) VALUES ('kh.task.000008','open');
 
 
 split -d -a 6 -l 3000 file_to_split tile_to_prefix_task.
+
+
+C:\seed>for /R C:\seed\ips\all-zones\tasks %i in (*) do theThreader.py -i %i -t 300

@@ -3,6 +3,7 @@
 
 import sys
 import os
+import string
 
 try:
 	import sqlite3
@@ -15,7 +16,18 @@ try:
 except ImportError:
 	print 'need som bottle module'
 	sys.exit()
+	
+__author__ = 'Jaime Filson aka WiK'
+__license__ = 'BSD (3-Clause)'
+__version__ = '0'
+__date__ = ''
+__maintainer__ = 'WiK'
+__email__ = 'wick2o@gmail.com'
+__status__ = 'Beta'
 
+db_name = 'tasklist.db'
+valid_chars = '.%s%s' % (string.ascii_letters, string.digits)
+	
 @get('/upload')
 def upload_view():
 	return """
@@ -24,55 +36,123 @@ def upload_view():
 	<input type="submit" name="submit" value="upload now" />
 	</form>
 	""" 
+
 @post('/upload')
 def do_upload():
-    name = request.forms.get('name')
-    data = request.files.get('data')
-    if data is not None:
-        raw = data.file.read() # small files =.=
-        filename = data.filename
-		# block all /, ../, anything non alphanum
-		if re.search("^[A-Za-z0-9]+\.done$", filename) == None:
-			return "Go away"
-        f = open(filename, 'wb')
-        f.write(raw)
-        f.close()
-        conn = sqlite3.connect('tasklist.db')
-        c = conn.cursor()
-		if filename.find("'") != -1:
+	global db
+	data = request.files.get('data')
+	if data is not None:
+		raw = data.file.read() # small files =.=
+		filename = data.filename
+		
+		t_name = ''.join(c for c in filename if c in valid_chars)
+		
+		if filename == t_name:
+			# get ip address of the task
+			c = db.cursor()
+			c.execute("SELECT ip,status from tasks where task = '%s'" % (filename.replace('.done','')))
+			res = c.fetchall()
+			curr_status = res[0][1]
+			orig_ip = res[0][0]
+			new_ip = request.environ.get('REMOTE_ADDR')
+			if orig_ip == new_ip:
+				if curr_status != 'finished':
+					f = open(filename, 'wb')
+					f.write(raw)
+					f.close()
+					c.execute("UPDATE tasks SET status = 'finished' where task = '%s'" % (filename.replace('.done','')))
+					db.commit()
+					c.close()
+					return "You uploaded %s (%d bytes)." % (filename, len(raw))
+				else:
+					c.close()
+					return "This task has already been completed"
+			else:
+				c.close()
+				return "The new ip address does not match the database..."
+		else:
 			c.close()
-			return "Go away"
-        c.execute("UPDATE todo SET status = 'finished' where task = '%s'" % (filename.replace('.done','')))
-        conn.commit()
-        c.close()
-        conn.close()
-        return "Hello %s! You uploaded %s (%d bytes)." % (name, filename, len(raw))
-    return "You missed a field."
+			return "Stop Messing with the site"
+
+@get('/cancelme/<taskname>')
+def cancel_task(taskname='None'):
+	global db
+	if taskname != 'None':
+		t_taskname = ''.join(c for c in taskname if c in valid_chars)
+		if t_taskname == taskname:
+			c = db.cursor()
+			c.execute("SELECT ip,status from tasks where task = '%s'" % (taskname))
+			res = c.fetchall()
+			curr_status = res[0][1]
+			orig_ip = res[0][0]
+			new_ip = request.environ.get('REMOTE_ADDR')
+			if orig_ip == new_ip:
+				if curr_status == 'assigned':
+					c.execute("UPDATE tasks set status = 'open',user = 'None',ip = 'None' where task = '%s'" % (taskname))
+					db.commit()
+					c.close()
+					return "0"
+			else:
+				c.close()
+				return "IPSNOMATCH"
 	
-@route('/gettask')
-def get_task():
-	conn = sqlite3.connect('tasklist.db')
-	c = conn.cursor()
-	c.execute("SELECT task FROM todo WHERE status = 'open' LIMIT 1")
+@route('/gettask/<name>')
+def get_task(name='Anonymous'):
+	global db
+	c = db.cursor()
+	c.execute("SELECT task FROM tasks WHERE status = 'open' LIMIT 1")
 	result = c.fetchall()
-	c.execute("UPDATE todo SET status = 'assigned' where task = '%s'" % (result[0][0]))
-	conn.commit()
+	c.execute("UPDATE tasks SET status = 'assigned', user = '%s', ip = '%s' where task = '%s'" % (name, request.environ.get('REMOTE_ADDR'), result[0][0]))
+	db.commit()
 	c.close()
-	conn.close()
 	f_name = result[0][0]
 	return static_file(f_name, root='tasks/', download=f_name)
 
 @route('/')
 @route('/listtasks')
 def list_tasks():
-	conn = sqlite3.connect('tasklist.db')
-	c = conn.cursor()
-	c.execute("SELECT * FROM todo")
+	global db
+	
+	c = db.cursor()
+	c.execute("SELECT * FROM tasks")
 	result = c.fetchall()
 	c.close()
-	conn.close()
-	return template('make_table', rows=result)
+	return template('tpl\make_table', rows=result)
 
+def logo():
+	print "     _     ___                           "
+	print " ___| |_  / _ \___ _ __  _ __   ___ _ __ "
+	print "/ __| __|/ /_)/ _ \ '_ \| '_ \ / _ \ '__|"
+	print "\__ \ |_/ ___/  __/ |_) | |_) |  __/ |   "
+	print "|___/\__\/    \___| .__/| .__/ \___|_|   "
+	print "                  |_|   |_|              "
+	print ""
+	print "             - with a little help from my friends -"
+	print ""
+	print "Author:  %s" % (__author__)
+	print "Version: %s" % (__version__)
+	print "Status:  %s" % (__status__)
+	print ""
 
+def database_check():
+	global db_name
+	global db
+	if os.path.exists(db_name):
+		print 'Skipping database generation, %s already exists...' % (db_name)
+		db = sqlite3.connect(db_name)
+	else:
+		print 'Database does not exist, creating %s...' % (db_name)
+		db = sqlite3.connect(db_name)
+		db.execute("CREATE TABLE tasks (id INTEGER PRIMARY KEY, task varchar(255) NOT NULL, user varchar(100), ip varchar(25), status varchar(100))")
+		db.commit()
+	print ""
+
+def main():
+	logo()
+	database_check()
+	run(host='0.0.0.0', port=8080)
 	
-run(host='172.16.1.10', port=8080, reloader=True)
+if __name__ == "__main__":
+	main()
+	
+	
