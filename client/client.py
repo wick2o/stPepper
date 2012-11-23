@@ -11,6 +11,7 @@ from threading import Thread, activeCount, Lock, current_thread
 from subprocess import call
 import urllib2
 import urllib
+import re
 
 
 __author__ = ''
@@ -84,7 +85,7 @@ def upload_results():
 	f.close()
 	
 	#Post to server:
-	call(["curl", "-X", "POST", "-T", f_name, , "-F", "name=submit", "http://50.17.217.148/upload?data="
+	#call(["curl", "-X", "POST", "-T", f_name, , "-F", "name=submit", "http://50.17.217.148/upload?data="
 	#cleanup
 	if os.path.exists(f_name):
 		os.remove(f_name)
