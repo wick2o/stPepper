@@ -1,6 +1,14 @@
 sqlite3.exe tastlist.db
 CREATE TABLE todo (id INTEGER PRIMARY KEY, task varchar(255) NOT NULL, status varchar(100));
 
+ sqlite3 -line mydata.db 'select * from memos where priority > 20;'
+ 
+for i in `dir fr.list.*`; do echo sqlite3 -line ../tasklist.db "INSERT INTO todo (task,status) VALUES ('$i','open');"; done
+
+
+FOR /L %variable IN (start,step,end) DO command [command-parameters]
+
+
 INSERT INTO todo (task,status) VALUES ('kh.task.000000','open');
 INSERT INTO todo (task,status) VALUES ('kh.task.000003','open');
 INSERT INTO todo (task,status) VALUES ('kh.task.000006','open');
