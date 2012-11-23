@@ -119,7 +119,7 @@ def progressbar(progress, total):
 	#calculate progress for 25, 50, 75, and 99%
 	vals = [int(total/100*25), int(total/100*50), int(total/100*75), int(total-1)]
 	if progress in vals:
-		print "%s %s% complete" % (("#"*(progress_percentage / 10)), progress_percentage)	
+		print "%s %s%% complete" % (("#"*(progress_percentage / 10)), progress_percentage)	
 
 def process_handler(ipaddresses):
 	progress = 0
@@ -155,6 +155,8 @@ def process_handler(ipaddresses):
 	else:
 		for ip in ipaddresses:
 			run_process(ip)
+			progress = progress +1
+			progressbar(progress, len(ipaddresses))
 			if sigint == True:
 				signal_handler('','')
 	return
