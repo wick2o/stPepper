@@ -27,4 +27,5 @@ INSERT INTO todo (task,status) VALUES ('kh.task.000008','open');
 split -d -a 6 -l 3000 file_to_split tile_to_prefix_task.
 
 
-C:\seed>for /R C:\seed\ips\all-zones\tasks %i in (*) do theThreader.py -i %i -t 300
+for /R C:\seed\ips\all-zones\tasks %i in (*) do theThreader2.py -i %i -t 300
+

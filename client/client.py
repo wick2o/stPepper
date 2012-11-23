@@ -113,9 +113,16 @@ def upload_results():
 	#if os.path.exists(df):
 		#os.remove(df)
 
-	
+def progressbar(progress, total):
+	progress_percentage = int(100 / (float(total) / float(progress)))
+	total = float(total)
+	#calculate progress for 25, 50, 75, and 99%
+	vals = [int(total/100*25), int(total/100*50), int(total/100*75), int(total-1)]
+	if progress in vals:
+		print "%s %s% complete" % (("#"*(progress_percentage / 10)), progress_percentage)	
 
 def process_handler(ipaddresses):
+	progress = 0
 	if args.threads > 1:
 		threads = []
 		for ip in ipaddresses:
@@ -132,10 +139,10 @@ def process_handler(ipaddresses):
 					threads.append(t)
 					t.start()
 				finally:
+					progress = len(ipaddresses) - queue.qsize()
 					progress_lock.acquire()
 					try:
-						#run a progress bar here
-						pass
+						progressbar(progress, len(ipaddresses))
 					finally:
 						progress_lock.release()
 					queue.task_done()
