@@ -105,6 +105,7 @@ def run_process(ip):
 		
 def upload_results():
 	global fname
+	socket.setdefaulttimeout(10)
 	print "Completed Task: %s" % (f_name)
 	df = '%s.done' % (f_name)
 	f = open(df, 'wb')
