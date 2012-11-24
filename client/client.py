@@ -209,10 +209,16 @@ def setup():
 	
 
 def main():
+	global foundips
+	global ipaddresses
+	
 	logo()
 	setup()
 	for t in range(args.tasks):
 		print "Running task %d of %d" % (t + 1, args.tasks)
+		ipaddresses = []
+		foundips = []
+
 		request_task()
 		load_ipaddresses()
 		process_handler(ipaddresses)

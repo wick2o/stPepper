@@ -99,10 +99,11 @@ def cancel_task(taskname='None'):
 @route('/gettask/<name>')
 def get_task(name='Anonymous'):
 	global db
+	t_name = ''.join(c for c in name if c in valid_chars)
 	c = db.cursor()
 	c.execute("SELECT task FROM tasks WHERE status = 'open' LIMIT 1")
 	result = c.fetchall()
-	c.execute("UPDATE tasks SET status = 'assigned', user = '%s', ip = '%s' where task = '%s'" % (name, request.environ.get('REMOTE_ADDR'), result[0][0]))
+	c.execute("UPDATE tasks SET status = 'assigned', user = '%s', ip = '%s' where task = '%s'" % (t_name, request.environ.get('REMOTE_ADDR'), result[0][0]))
 	db.commit()
 	c.close()
 	f_name = result[0][0]
