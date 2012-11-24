@@ -114,7 +114,7 @@ def list_tasks():
 	global db
 	
 	c = db.cursor()
-	c.execute("SELECT * FROM tasks")
+	c.execute("SELECT id,task,user,status FROM tasks")
 	result = c.fetchall()
 	c.close()
 	return template('tpl\make_table', rows=result)
