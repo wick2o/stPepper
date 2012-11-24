@@ -14,6 +14,12 @@ import urllib
 import string
 import socket
 
+try:
+	from poster.encode import multipart_encode
+	from poster.streaminghttp import register_openers
+except ImportError:
+	print "Must install poster lib. easy_install poster"
+	sys.exit()
 
 __author__ = 'Jaime Filson aka WiK'
 __license__ = 'BSD (3-Clause)'
@@ -104,14 +110,22 @@ def upload_results():
 	f = open(df, 'wb')
 	f.write('\n'.join(foundips))
 	f.close()
+
+	url = 'http://%s/upload' % (args.server)
 	
-	#Post to server:
-	#call(["curl", "-X", "POST", "-T", f_name, , "-F", "name=submit", "http://50.17.217.148/upload?data="
-	#cleanup
+	register_openers()
+	f = open(df, 'rb')
+	datagen, headers = multipart_encode({'data': f})
+	request = urllib2.Request(url,datagen,headers)
+	print urllib2.urlopen(request).read()
+	f.close()
+
+	
+	
 	if os.path.exists(f_name):
 		os.remove(f_name)
-	#if os.path.exists(df):
-		#os.remove(df)
+	if os.path.exists(df):
+		os.remove(df)
 
 def progressbar(progress, total):
 	progress_percentage = int(100 / (float(total) / float(progress)))
