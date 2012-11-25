@@ -55,6 +55,7 @@ def logo():
 def request_task():
 	global f_name
 	global valid_chars
+	socket.setdefaulttimeout(60)
 	try:
 		res = urllib2.urlopen('http://%s/gettask/%s' % (args.server,args.user))
 	except:
@@ -105,7 +106,7 @@ def run_process(ip):
 		
 def upload_results():
 	global fname
-	socket.setdefaulttimeout(30)
+	socket.setdefaulttimeout(60)
 	print "Completed Task: %s" % (f_name)
 	df = '%s.done' % (f_name)
 	f = open(df, 'wb')
@@ -186,6 +187,7 @@ def signal_handler(signal, frame):
 	print ' Ctrl+C detected... exiting...\n'
 	
 	try:
+		socket.setdefaulttimeout(60)
 		res = urllib2.urlopen('http://%s/cancelme/%s' % (args.server,f_name))
 	except:
 		pass

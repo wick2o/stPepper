@@ -23,8 +23,11 @@ INSERT INTO todo (task,status) VALUES ('kh.task.000008','open');
 
 
 for i in `ls *.done`; do rm tasks/${i:0:10}; done
+for i in `ls *.done`; do rm ../tasks/${i:0:14}; done
+
 
 client.py -s 50.17.217.148 -u WiK -t 25
+seq -w 0 9999 | parallel -j10 -n0 ./client.py -s 50.17.217.148 -u <nick> -t 50
 
 split -d -a 6 -l 3000 file_to_split tile_to_prefix_task.
 
