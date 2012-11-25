@@ -118,11 +118,14 @@ def upload_results():
 	register_openers()
 	f = open(df, 'rb')
 	datagen, headers = multipart_encode({'data': f})
-	request = urllib2.Request(url,datagen,headers)
-	print urllib2.urlopen(request).read()
+	try:
+		request = urllib2.Request(url,datagen,headers)
+		print urllib2.urlopen(request).read()
+	except:
+		print "Some kind of error uploading..."
+		res = urllib2.urlopen('http://%s/cancelme/%s' % (args.server,f_name))
+		
 	f.close()
-
-	
 	
 	if os.path.exists(f_name):
 		os.remove(f_name)

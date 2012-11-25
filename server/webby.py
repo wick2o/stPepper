@@ -128,9 +128,9 @@ def list_tasks():
 	c = db.cursor()
 	c.execute("SELECT id,task,user,status FROM tasks where status != 'finished'")
 	result = c.fetchall()
-	db.close()
 	c.close()
-	return template('tpl\make_table', rows=result)
+	db.close()
+	return template('./tpl/make_table', rows=result)
 
 def logo():
 	print "     _     ___                           "
