@@ -23,7 +23,7 @@ __version__ = '0'
 __date__ = ''
 __maintainer__ = 'WiK'
 __email__ = 'wick2o@gmail.com'
-__status__ = 'Beta'
+__status__ = 'Alpha'
 
 db_name = 'tasklist.db'
 valid_chars = '.%s%s' % (string.ascii_letters, string.digits)
@@ -58,7 +58,7 @@ def do_upload():
 			new_ip = request.environ.get('REMOTE_ADDR')
 			if orig_ip == new_ip:
 				if curr_status != 'finished':
-					f = open(filename, 'wb')
+					f = open("./fin/%s" % (filename), 'wb')
 					f.write(raw)
 					f.close()
 					c.execute("UPDATE tasks SET status = 'finished' where task = '%s'" % (filename.replace('.done','')))
@@ -126,7 +126,7 @@ def list_tasks():
 	global db_name
 	db = sqlite3.connect(db_name)	
 	c = db.cursor()
-	c.execute("SELECT id,task,user,status FROM tasks where status != 'finished'")
+	c.execute("SELECT count(tasks) FROM tasks where status != 'finished'")
 	result = c.fetchall()
 	c.close()
 	db.close()
@@ -162,7 +162,7 @@ def database_check():
 def main():
 	logo()
 	database_check()
-	run(host='0.0.0.0', port=8080)
+	run(host='0.0.0.0', port=80)
 	
 if __name__ == "__main__":
 	main()

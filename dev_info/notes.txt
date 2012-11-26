@@ -1,29 +1,14 @@
-sqlite3.exe tastlist.db
-CREATE TABLE tasks (id INTEGER PRIMARY KEY, task varchar(255) NOT NULL, user varchar(100), status varchar(100));
-
- sqlite3 -line mydata.db 'select * from memos where priority > 20;'
+sqlite3 -line mydata.db 'select * from memos where priority > 20;'
  
 for i in `dir fr.list.*`; do echo sqlite3 -line ../tasklist.db "INSERT INTO todo (task,status) VALUES ('$i','open');"; done
 
 
 FOR /L %variable IN (start,step,end) DO command [command-parameters]
 
-
-INSERT INTO todo (task,status) VALUES ('kh.task.000000','open');
-INSERT INTO todo (task,status) VALUES ('kh.task.000003','open');
-INSERT INTO todo (task,status) VALUES ('kh.task.000006','open');
-INSERT INTO todo (task,status) VALUES ('kh.task.000009','open');
-INSERT INTO todo (task,status) VALUES ('kh.task.000001','open');
-INSERT INTO todo (task,status) VALUES ('kh.task.000004','open');
-INSERT INTO todo (task,status) VALUES ('kh.task.000007','open');
-INSERT INTO todo (task,status) VALUES ('kh.task.000010','open');
-INSERT INTO todo (task,status) VALUES ('kh.task.000002','open');
-INSERT INTO todo (task,status) VALUES ('kh.task.000005','open');
-INSERT INTO todo (task,status) VALUES ('kh.task.000008','open');
-
-
-for i in `ls *.done`; do rm tasks/${i:0:10}; done
+cd fin
 for i in `ls *.done`; do rm ../tasks/${i:0:14}; done
+
+utils/zip_results.py -o /home/ubuntu/fin3.zip -f ./fin/
 
 
 client.py -s 50.17.217.148 -u WiK -t 25
@@ -31,6 +16,7 @@ seq -w 0 9999 | parallel -j10 -n0 ./client.py -s 50.17.217.148 -u <nick> -t 50
 
 split -d -a 6 -l 3000 file_to_split tile_to_prefix_task.
 
-
 for /R C:\seed\ips\all-zones\tasks %i in (*) do theThreader2.py -i %i -t 300
 
+https://raw.github.com/wick2o/stPepper/master/client/client.py
+client.py -s 50.17.217.148 -u <NICK> -t <threads> -w <pause between tasks> -m <max tasks to do in a row>

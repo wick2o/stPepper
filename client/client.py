@@ -27,7 +27,7 @@ __version__ = '0'
 __date__ = ''
 __maintainer__ = 'WiK'
 __email__ = 'wick2o@gmail.com'
-__status__ = 'Beta'
+__status__ = 'Alpha'
 
 ipaddresses = []
 queue = Queue.Queue()
