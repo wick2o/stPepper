@@ -10,13 +10,16 @@ for i in `ls *.done`; do rm ../tasks/${i:0:14}; done
 
 utils/zip_results.py -o /home/ubuntu/fin3.zip -f ./fin/
 
+C:\Python27\python.exe setup.py py2exe
+
 
 client.py -s 50.17.217.148 -u WiK -t 25
 seq -w 0 9999 | parallel -j10 -n0 ./client.py -s 50.17.217.148 -u <nick> -t 50
-
-split -d -a 6 -l 3000 file_to_split tile_to_prefix_task.
 
 for /R C:\seed\ips\all-zones\tasks %i in (*) do theThreader2.py -i %i -t 300
 
 https://raw.github.com/wick2o/stPepper/master/client/client.py
 client.py -s 50.17.217.148 -u <NICK> -t <threads> -w <pause between tasks> -m <max tasks to do in a row>
+
+split -d -a 6 -l 25000 gh.list.txt gh.list.
+for i in `ls *.txt`; do split -d -a 6 -l 25000 $i ${i:0:8}; done
