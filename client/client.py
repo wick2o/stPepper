@@ -18,7 +18,7 @@ try:
 	from poster.encode import multipart_encode
 	from poster.streaminghttp import register_openers
 except ImportError:
-	print "Must install poster lib. easy_install poster"
+	print "Missing needed module: easy_install poster"
 	sys.exit()
 
 __author__ = 'Jaime Filson aka WiK'

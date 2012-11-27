@@ -9,13 +9,13 @@ import argparse
 try:
 	import sqlite3
 except ImportError:
-	print 'need some sqlite3 module'
+	print 'Missing needed module: easy_install sqlite3'
 	sys.exit()
 	
 try:
 	from bottle import route, run,template,static_file,request,post,get
 except ImportError:
-	print 'need som bottle module'
+	print 'Missing needed module: easy_install bottle'
 	sys.exit()
 	
 __author__ = 'Jaime Filson aka WiK'
