@@ -4,6 +4,7 @@
 import sys
 import os
 import string
+import argparse
 
 try:
 	import sqlite3
@@ -158,11 +159,20 @@ def database_check():
 		db.commit()
 		db.close()
 	print ""
-
+	
+def setup():
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-i', '--ip', action='store', dest='ip', default='0.0.0.0', type=str, help='Ip to listen on')
+	parser.add_argument('-p', '--port', action='store', dest='port', default=80, type=int, help='Port to listen on')
+	
+	global args
+	args = parser.parse_args()
+	
 def main():
 	logo()
+	setup()
 	database_check()
-	run(host='0.0.0.0', port=80)
+	run(host=args.ip, port=args.port)
 	
 if __name__ == "__main__":
 	main()

@@ -8,7 +8,7 @@ FOR /L %variable IN (start,step,end) DO command [command-parameters]
 cd fin
 for i in `ls *.done`; do rm ../tasks/${i:0:14}; done
 
-utils/zip_results.py -o /home/ubuntu/fin3.zip -f ./fin/
+utils/zip_results.py -o /home/ubuntu/fin5.zip -f ./fin/
 
 C:\Python27\python.exe setup.py py2exe
 

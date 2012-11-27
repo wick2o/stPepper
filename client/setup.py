@@ -7,10 +7,12 @@ import os
 import sys
 
 def main():
-	setup(console = ['client.py'],
+	setup(console = [{'script': 'client.py', 'icon_resources' : [(1, 'yellowsub.ico')]}],
 		options = {'py2exe': {'bundle_files' : 1, 'includes' : ['poster'], 'dll_excludes': ['w9xpopen.exe'],}},
 		zipfile = None,
-		optimize = 2)
+		optimize = 2,
+		icon_resources = [(1, 'yellowsub.ico')],
+		)
 		
 def cleanup():
 	if os.name != 'posix':
