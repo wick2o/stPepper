@@ -6,7 +6,7 @@ stPepper: Distributed Tasks
     My attempt at a framework for completing large amount of tasks with help from
 	multiple people. This program is released as is.
 
-    Depenancies:
+    Dependencies:
 		Python 2.7+:
 			Client: poster
 			Server: bottle, sqlite3

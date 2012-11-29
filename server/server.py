@@ -4,7 +4,12 @@
 import sys
 import os
 import string
-import argparse
+
+try:
+	import argparse
+except ImportError:
+	print "Missing needed module: easy_install argparse"
+	sys.exit()
 
 try:
 	import sqlite3
@@ -165,12 +170,20 @@ def setup():
 	parser.add_argument('-i', '--ip', action='store', dest='ip', default='0.0.0.0', type=str, help='Ip to listen on')
 	parser.add_argument('-p', '--port', action='store', dest='port', default=80, type=int, help='Port to listen on')
 	
+	verbose_group = parser.add_mutually_exclusive_group()
+	verbose_group.add_argument('-d', '--debug', action='store_true', dest='debug', help='Show Debug Messages')
+	verbose_group.add_argument('-q', '--quite', action='store_true', dest='quite', help='Hide General Messages')
+	
 	global args
 	args = parser.parse_args()
 	
 def main():
-	logo()
+	global args
 	setup()
+	
+	if not args.quite:
+		logo()
+	
 	database_check()
 	run(host=args.ip, port=args.port)
 	
