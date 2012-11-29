@@ -68,7 +68,7 @@ def request_task():
 	
 		res = urllib2.urlopen('http://%s/gettask/%s' % (args.server,args.user))
 	except:
-		print 'No avaiable Tasks...'
+		print 'No available Tasks...'
 		sys.exit()
 		
 	f_name = res.info()['Content-Disposition'].split('filename=')[1].replace('"','')
