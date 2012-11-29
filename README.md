@@ -7,8 +7,12 @@ stPepper: Distributed Tasks
 	multiple people. This program is released as is.
 
     Depenancies:
-		Client: poster
-		Server: bottle, sqlite3
+		Python 2.7+:
+			Client: poster
+			Server: bottle, sqlite3
+		Python 2.6+:
+			Client: poster, argparse
+			Server: bottle, sqlite3, argparse
 		
 Example Client Usage:
 =====================
@@ -26,5 +30,5 @@ Example Server Usage:
 
 > Server Startup
 
-	./webby.py -i 0.0.0.0 -p 80
+	./server.py -i 0.0.0.0 -p 80
 

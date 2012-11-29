@@ -3,7 +3,6 @@
 
 import os
 import sys
-import argparse
 import Queue
 import signal
 import time
@@ -13,6 +12,12 @@ import urllib2
 import urllib
 import string
 import socket
+
+try:
+	import argparse
+except ImportError:
+	print "Missing needed module: easy_install argparse"
+	sys.exit()
 
 try:
 	from poster.encode import multipart_encode
@@ -53,20 +58,31 @@ def logo():
 	print ""
 
 def request_task():
+	global args
 	global f_name
 	global valid_chars
 	socket.setdefaulttimeout(60)
 	try:
+		if args.debug:
+			print 'Attempting to connect to http://%s/gettask/%s' % (args.server,args.user)
+	
 		res = urllib2.urlopen('http://%s/gettask/%s' % (args.server,args.user))
 	except:
-		print "No avaiable Tasks..."
+		print 'No avaiable Tasks...'
 		sys.exit()
 		
 	f_name = res.info()['Content-Disposition'].split('filename=')[1].replace('"','')
+	
+	if args.debug:
+		print 'Validating filename...'
+		print '\tString from Server: %s' % (f_name)
+		print '\tString from Validation: %s' % (t_name)
+		
 	t_name = ''.join(c for c in f_name if c in valid_chars)
 	
 	if f_name == t_name:
-		#print 'everything is legit'
+		if args.debug:
+			print 'Strings Match! Writing contents to %s' % (f_name)
 		f_content = res.read()
 		f = open(f_name, 'wb')
 		f.write(f_content)
@@ -129,18 +145,23 @@ def upload_results():
 	
 	if os.path.exists(f_name):
 		os.remove(f_name)
+	
 	if os.path.exists(df):
 		os.remove(df)
 
 def progressbar(progress, total):
-	progress_percentage = int(100 / (float(total) / float(progress)))
-	total = float(total)
-	#calculate progress for 25, 50, 75, and 99%
-	vals = [int(total/100*25), int(total/100*50), int(total/100*75), int(total-1)]
-	if progress in vals:
-		print "%s %s%% complete" % (("#"*(progress_percentage / 10)), progress_percentage)	
+	global args
+	if not args.quite:
+		progress_percentage = int(100 / (float(total) / float(progress)))
+		total = float(total)
+		#calculate progress for 25, 50, 75, and 99%
+		vals = [int(total/100*25), int(total/100*50), int(total/100*75), int(total-1)]
+		if progress in vals:
+			print "%s %s%% complete" % (("#"*(progress_percentage / 10)), progress_percentage)	
 
 def process_handler(ipaddresses):
+	global args
+	
 	progress = 0
 	if args.threads > 1:
 		threads = []
@@ -182,6 +203,9 @@ def process_handler(ipaddresses):
 
 
 def signal_handler(signal, frame):
+	global args
+	if args.debug:
+		print 'Running the signal_handler function...'
 	#handles ctrl+c events
 	global sigint
 	global f_name
@@ -191,11 +215,15 @@ def signal_handler(signal, frame):
 	
 	try:
 		socket.setdefaulttimeout(60)
+		if args.debug:
+			print 'Attempting to tell server to reset my chunk by calling http://%s/cancelme/%s' % (args.server,f_name)
 		res = urllib2.urlopen('http://%s/cancelme/%s' % (args.server,f_name))
 	except:
 		pass
 	
 	# cleanup from canceled task
+	if args.debug:
+		print 'Attempting to delete the chunk file if it exists...'
 	if os.path.exists(f_name):
 		os.remove(f_name)
 		
@@ -210,6 +238,10 @@ def setup():
 	parser.add_argument('-s', '--server', action='store',dest='server', required=True, help='IP address of the server for tasks')
 	parser.add_argument('-u', '--user', action='store', dest='user', default='Anonymous', help='Username of helper')
 	
+	verbose_group = parser.add_mutually_exclusive_group()
+	verbose_group.add_argument('-d', '--debug', action='store_true', dest='debug', help='Show Debug Messages')
+	verbose_group.add_argument('-q', '--quite', action='store_true', dest='quite', help='Hide General Messages')
+		
 	global args
 	args = parser.parse_args()
 	
@@ -217,9 +249,12 @@ def setup():
 def main():
 	global foundips
 	global ipaddresses
+	global args
 	
-	logo()
 	setup()
+	if not args.quite:
+		logo()
+	
 	for t in range(args.tasks):
 		print "Running task %d of %d" % (t + 1, args.tasks)
 		ipaddresses = []
