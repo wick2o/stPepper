@@ -26,6 +26,10 @@ except ImportError:
 	print "Missing needed module: easy_install poster"
 	sys.exit()
 
+#This is where I setup possible projects
+import projects.sample
+
+
 __author__ = 'Jaime Filson aka WiK'
 __license__ = 'BSD (3-Clause)'
 __version__ = '0'
@@ -38,9 +42,17 @@ ipaddresses = []
 queue = Queue.Queue()
 sigint = False
 foundips = []
+my_projects = []
+
 
 valid_chars = '.%s%s' % (string.ascii_letters, string.digits)
 
+def load_projects():
+	global my_projects
+	
+	import projects.sample
+	
+	my_projects.append('sample')
 
 def logo():
 	print "     _     ___                           "
@@ -56,6 +68,7 @@ def logo():
 	print "Version: %s" % (__version__)
 	print "Status:  %s" % (__status__)
 	print ""
+	
 
 def request_task():
 	global args
@@ -227,7 +240,7 @@ def signal_handler(signal, frame):
 	if os.path.exists(f_name):
 		os.remove(f_name)
 		
-	
+	cleanup()
 	sys.exit(1)
 
 def setup():
@@ -238,6 +251,10 @@ def setup():
 	parser.add_argument('-s', '--server', action='store',dest='server', required=True, help='IP address of the server for tasks')
 	parser.add_argument('-u', '--user', action='store', dest='user', default='Anonymous', help='Username of helper')
 	
+	project_group = parser.add_mutually_exclusive_group()
+	project_group.add_argument('-l', '--list', action='store_true', dest='list', help='List possible Projects')
+	project_group.add_argument('-p', '--project', action='store', dest='project', help='Project to run')
+	
 	verbose_group = parser.add_mutually_exclusive_group()
 	verbose_group.add_argument('-d', '--debug', action='store_true', dest='debug', help='Show Debug Messages')
 	verbose_group.add_argument('-q', '--quite', action='store_true', dest='quite', help='Hide General Messages')
@@ -245,7 +262,11 @@ def setup():
 	global args
 	args = parser.parse_args()
 	
-
+def cleanup():
+	for root,dirs, files in os.walk('projects'):
+		for file in files:
+			if os.path.splitext(file)[1] == '.pyc':
+				os.remove(os.path.join(root, file))
 def main():
 	global foundips
 	global ipaddresses
@@ -255,17 +276,30 @@ def main():
 	if not args.quite:
 		logo()
 	
-	for t in range(args.tasks):
-		print "Running task %d of %d" % (t + 1, args.tasks)
-		ipaddresses = []
-		foundips = []
+	load_projects()
 
-		request_task()
-		load_ipaddresses()
-		process_handler(ipaddresses)
-		upload_results()
-		time.sleep(args.wait)
+	if args.list:
+		print 'Possible Projects:'
+		print '\n'.join(my_projects)
+		cleanup()
+		sys.exit()
 	
+	projects.sample.main(args, 'www.google.com')
+		
+	
+	#for t in range(args.tasks):
+	#	print "Running task %d of %d" % (t + 1, args.tasks)
+	#	ipaddresses = []
+	#	foundips = []
+	#
+	#	request_task()
+	#	load_ipaddresses()
+	#	process_handler(ipaddresses)
+	#	upload_results()
+	#	time.sleep(args.wait)
+		
+		
+	cleanup()
 	sys.exit()
 
 if __name__ == "__main__":
