@@ -25,10 +25,10 @@ try:
 except ImportError:
 	print "Missing needed module: easy_install poster"
 	sys.exit()
-
-#This is where I setup possible projects
-import projects.sample
-
+	
+# Import possible project files
+# Code will be needed to args in setup() and and elseif in run_process()
+import projects.p80search
 
 __author__ = 'Jaime Filson aka WiK'
 __license__ = 'BSD (3-Clause)'
@@ -38,21 +38,14 @@ __maintainer__ = 'WiK'
 __email__ = 'wick2o@gmail.com'
 __status__ = 'Alpha'
 
-ipaddresses = []
+task_data = []
 queue = Queue.Queue()
 sigint = False
-foundips = []
-my_projects = []
 
+wanted_results = []
 
 valid_chars = '.%s%s' % (string.ascii_letters, string.digits)
 
-def load_projects():
-	global my_projects
-	
-	import projects.sample
-	
-	my_projects.append('sample')
 
 def logo():
 	print "     _     ___                           "
@@ -85,14 +78,13 @@ def request_task():
 		sys.exit()
 		
 	f_name = res.info()['Content-Disposition'].split('filename=')[1].replace('"','')
+	t_name = ''.join(c for c in f_name if c in valid_chars)
 	
 	if args.debug:
 		print 'Validating filename...'
 		print '\tString from Server: %s' % (f_name)
 		print '\tString from Validation: %s' % (t_name)
-		
-	t_name = ''.join(c for c in f_name if c in valid_chars)
-	
+
 	if f_name == t_name:
 		if args.debug:
 			print 'Strings Match! Writing contents to %s' % (f_name)
@@ -107,43 +99,34 @@ def request_task():
 	res.close()
 	
 	
-def load_ipaddresses():
+def load_task_data():
 	global f_name
 	
-	ip_file = open(f_name,'r')
-	ip_read = ip_file.readlines()
-	ip_read = [item.rstrip() for item in ip_read]
-	for ip in ip_read:
-		if not ip.startswith('#'): #ignore comments
-			ipaddresses.append(ip)
-	ip_file.close()
+	td_file = open(f_name,'r')
+	td_read = td_file.readlines()
+	td_read = [item.rstrip() for item in td_read]
+	for itm in td_read:
+		if not itm.startswith('#'): #ignore comments
+			task_data.append(itm)
+	td_file.close()
 	
-	
-def run_process(ip):
-	#print 'Looking up %s' % (ip)
-	url = 'http://%s' % (ip)
-	socket.setdefaulttimeout(2)
-	
-	req = urllib2.Request(url)
-	req.add_header('User-Agent', 'Mozilla/6.0 (Windows NT 6.2; WOW64; rv:16.0.1) Gecko/20121011 Firefox/16.0.1')
-	try:
-		res = urllib2.urlopen(req)
-		foundips.append(ip)
-	except:
-		res = 'error'
-	
-		
+
+def run_process(project,itm):
+	if project == 'p80search':
+		x = projects.p80search.p80search()
+		res = x.process_single(itm)
+		if res == True:
+			wanted_results.append(itm)
+
 def upload_results():
-	global fname
+	global f_name
 	socket.setdefaulttimeout(60)
 	print "Completed Task: %s" % (f_name)
 	df = '%s.done' % (f_name)
 	f = open(df, 'wb')
-	f.write('\n'.join(foundips))
+	f.write('\n'.join(wanted_results))
 	f.close()
-
 	url = 'http://%s/upload' % (args.server)
-	
 	register_openers()
 	f = open(df, 'rb')
 	datagen, headers = multipart_encode({'data': f})
@@ -153,13 +136,10 @@ def upload_results():
 	except:
 		print "Some kind of error uploading..."
 		res = urllib2.urlopen('http://%s/cancelme/%s' % (args.server,f_name))
-		
 	f.close()
-	
-	if os.path.exists(f_name):
+	if os.path.exists(f_name) and not args.debug:
 		os.remove(f_name)
-	
-	if os.path.exists(df):
+	if os.path.exists(df) and not args.debug:
 		os.remove(df)
 
 def progressbar(progress, total):
@@ -172,30 +152,30 @@ def progressbar(progress, total):
 		if progress in vals:
 			print "%s %s%% complete" % (("#"*(progress_percentage / 10)), progress_percentage)	
 
-def process_handler(ipaddresses):
+def process_handler(task_data):
 	global args
 	
 	progress = 0
 	if args.threads > 1:
 		threads = []
-		for ip in ipaddresses:
-			queue.put(ip)
+		for itm in task_data:
+			queue.put(itm)
 		progress_lock = Lock()
 
 		while not queue.empty() and not sigint:
 			if args.threads >= activeCount() and not sigint:
-				ip = queue.get()
+				q_itm = queue.get()
 				try:
 					# setup thread to run process
-					t = Thread(target=run_process,args=(ip,))
+					t = Thread(target=run_process,args=(args.project,q_itm,))
 					t.daemon = True
 					threads.append(t)
 					t.start()
 				finally:
-					progress = len(ipaddresses) - queue.qsize()
+					progress = len(task_data) - queue.qsize()
 					progress_lock.acquire()
 					try:
-						progressbar(progress, len(ipaddresses))
+						progressbar(progress, len(task_data))
 					finally:
 						progress_lock.release()
 					queue.task_done()
@@ -206,10 +186,10 @@ def process_handler(ipaddresses):
 
 		queue.join()
 	else:
-		for ip in ipaddresses:
-			run_process(ip)
+		for itm in task_data:
+			run_process(args.project,itm)
 			progress = progress +1
-			progressbar(progress, len(ipaddresses))
+			progressbar(progress, len(task_data))
 			if sigint == True:
 				signal_handler('','')
 	return
@@ -237,11 +217,17 @@ def signal_handler(signal, frame):
 	# cleanup from canceled task
 	if args.debug:
 		print 'Attempting to delete the chunk file if it exists...'
-	if os.path.exists(f_name):
+	if os.path.exists(f_name) and not args.debug:
 		os.remove(f_name)
 		
 	cleanup()
 	sys.exit(1)
+	
+def cleanup():
+	for root,dirs, files in os.walk('projects'):
+		for file in files:
+			if os.path.splitext(file)[1] == '.pyc':
+				os.remove(os.path.join(root, file))
 
 def setup():
 	parser = argparse.ArgumentParser()
@@ -250,10 +236,7 @@ def setup():
 	parser.add_argument('-w', '--wait', action='store', dest='wait', default=0, type=int, help='Wait time between tasks in seconds')
 	parser.add_argument('-s', '--server', action='store',dest='server', required=True, help='IP address of the server for tasks')
 	parser.add_argument('-u', '--user', action='store', dest='user', default='Anonymous', help='Username of helper')
-	
-	project_group = parser.add_mutually_exclusive_group()
-	project_group.add_argument('-l', '--list', action='store_true', dest='list', help='List possible Projects')
-	project_group.add_argument('-p', '--project', action='store', dest='project', help='Project to run')
+	parser.add_argument('-p', '--project', action='store', dest='project', choices=['p80search'], required=True, help='Project to run')
 	
 	verbose_group = parser.add_mutually_exclusive_group()
 	verbose_group.add_argument('-d', '--debug', action='store_true', dest='debug', help='Show Debug Messages')
@@ -262,41 +245,34 @@ def setup():
 	global args
 	args = parser.parse_args()
 	
-def cleanup():
-	for root,dirs, files in os.walk('projects'):
-		for file in files:
-			if os.path.splitext(file)[1] == '.pyc':
-				os.remove(os.path.join(root, file))
+	try:
+		socket.inet_aton(args.server)
+	except:
+		print 'Error: The ip address is not valid'
+		cleanup()
+		sys.exit()
+		
+	
+
 def main():
-	global foundips
-	global ipaddresses
+	global wanted_results
+	global task_data
 	global args
 	
 	setup()
 	if not args.quite:
 		logo()
 	
-	load_projects()
+	for t in range(args.tasks):
+		print "Running task %d of %d" % (t + 1, args.tasks)
+		task_data = []
+		wanted_results = []
 
-	if args.list:
-		print 'Possible Projects:'
-		print '\n'.join(my_projects)
-		cleanup()
-		sys.exit()
-	
-	projects.sample.main(args, 'www.google.com')
-		
-	
-	#for t in range(args.tasks):
-	#	print "Running task %d of %d" % (t + 1, args.tasks)
-	#	ipaddresses = []
-	#	foundips = []
-	#
-	#	request_task()
-	#	load_ipaddresses()
-	#	process_handler(ipaddresses)
-	#	upload_results()
-	#	time.sleep(args.wait)
+		request_task()
+		load_task_data()
+		process_handler(task_data)
+		upload_results()
+		time.sleep(args.wait)
 		
 		
 	cleanup()

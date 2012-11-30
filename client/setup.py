@@ -8,6 +8,7 @@ import sys
 
 def main():
 	setup(console = [{'script': 'client.py', 'icon_resources' : [(1, 'yellowsub.ico')]}],
+		data_files = [('',['projects\*'])],
 		options = {'py2exe': {'bundle_files' : 1, 'includes' : ['poster'], 'dll_excludes': ['w9xpopen.exe'],}},
 		zipfile = None,
 		optimize = 2,
