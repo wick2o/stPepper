@@ -73,8 +73,9 @@ def request_task():
 			print 'Attempting to connect to http://%s/gettask/%s' % (args.server,args.user)
 	
 		res = urllib2.urlopen('http://%s/gettask/%s' % (args.server,args.user))
-	except:
-		print 'No available Tasks...'
+	
+	except (urllib2.HTTPError, urllib2.URLError) as err:
+		print 'Server has not responded, please check your ip address'
 		sys.exit()
 		
 	f_name = res.info()['Content-Disposition'].split('filename=')[1].replace('"','')
@@ -236,7 +237,7 @@ def setup():
 	parser.add_argument('-w', '--wait', action='store', dest='wait', default=0, type=int, help='Wait time between tasks in seconds')
 	parser.add_argument('-s', '--server', action='store',dest='server', required=True, help='IP address of the server for tasks')
 	parser.add_argument('-u', '--user', action='store', dest='user', default='Anonymous', help='Username of helper')
-	parser.add_argument('-p', '--project', action='store', dest='project', choices=['p80search'], required=True, help='Project to run')
+	parser.add_argument('-p', '--project', action='store', dest='project', choices=['p80search'], default='p80search', help='Project to run')
 	
 	verbose_group = parser.add_mutually_exclusive_group()
 	verbose_group.add_argument('-d', '--debug', action='store_true', dest='debug', help='Show Debug Messages')
