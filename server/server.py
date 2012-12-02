@@ -132,7 +132,7 @@ def list_tasks():
 	global db_name
 	db = sqlite3.connect(db_name)	
 	c = db.cursor()
-	c.execute("SELECT count(tasks) FROM tasks where status != 'finished'")
+	c.execute("SELECT count(task) FROM tasks where status != 'finished'")
 	result = c.fetchall()
 	c.close()
 	db.close()
