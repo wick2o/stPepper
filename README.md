@@ -13,17 +13,19 @@ stPepper: Distributed Tasks
 		Python 2.6+:
 			Client: poster, argparse
 			Server: bottle, sqlite3, argparse
+			
+		* Windows Client/Server should work without any python dependencies.
 		
 Example Client Usage:
 =====================
 
 > Complete Single task
 
-    ./client.py -s [SERVER IP] -u [USERNAME] -t [NUMBER OF THREADS]  
+    ./client.(py|exe) -s [SERVER IP] -u [USERNAME] -t [NUMBER OF THREADS]  
 
 > Complete Multiple tasks
 
-    ./client.py -s [SERVER IP] -u [USERNAME] -t [NUMBER OF THREADS] -m [NUMBER OF TASKS]
+    ./client.(py|exe) -s [SERVER IP] -u [USERNAME] -t [NUMBER OF THREADS] -m [NUMBER OF TASKS]
 
 
 Example Server Usage:
@@ -31,5 +33,5 @@ Example Server Usage:
 
 > Server Startup
 
-	./server.py -i 0.0.0.0 -p 80
+	./server.(py|exe) -i 0.0.0.0 -p 80
 
