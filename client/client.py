@@ -149,14 +149,26 @@ def progressbar(progress, total):
 		progress_percentage = int(100 / (float(total) / float(progress)))
 		total = float(total)
 		#calculate progress for 25, 50, 75, and 99%
-		vals = [int(total/100*25), int(total/100*50), int(total/100*75), int(total-1)]
+		vals = [
+				int(total/100*10),
+				int(total/100*20),
+				int(total/100*30),
+				int(total/100*40),
+				int(total/100*50), 
+				int(total/100*60), 
+				int(total/100*70),
+				int(total/100*80),
+				int(total/100*90),				
+				int(total-1)
+				]
 		if progress in vals:
-			print "%s %s%% complete" % (("#"*(progress_percentage / 10)), progress_percentage)	
+			sys.stdout.write("%s %s%% complete\r" % (("#"*(progress_percentage / 10)), progress_percentage))
 
 def process_handler(task_data):
 	global args
 	
 	progress = 0
+	
 	if args.threads > 1:
 		threads = []
 		for itm in task_data:
@@ -174,6 +186,7 @@ def process_handler(task_data):
 					t.start()
 				finally:
 					progress = len(task_data) - queue.qsize()
+					
 					progress_lock.acquire()
 					try:
 						progressbar(progress, len(task_data))
@@ -189,7 +202,7 @@ def process_handler(task_data):
 	else:
 		for itm in task_data:
 			run_process(args.project,itm)
-			progress = progress +1
+			progress = progress + 1
 			progressbar(progress, len(task_data))
 			if sigint == True:
 				signal_handler('','')
