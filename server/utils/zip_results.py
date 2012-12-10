@@ -3,8 +3,14 @@
 
 import os
 import sys
-import argparse
 import zipfile
+
+try:
+	import argparse
+except ImportError:
+	print "Missing needed module: easy_install argparse"
+	sys.exit()
+
 
 def setup():
 	parser = argparse.ArgumentParser()

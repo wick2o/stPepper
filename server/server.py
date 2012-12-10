@@ -160,7 +160,7 @@ def database_check():
 	else:
 		print 'Database does not exist, creating %s...' % (db_name)
 		db = sqlite3.connect(db_name)
-		db.execute("CREATE TABLE tasks (id INTEGER PRIMARY KEY, task varchar(255) NOT NULL, user varchar(100), ip varchar(25), status varchar(100))")
+		db.execute("CREATE TABLE tasks (id INTEGER PRIMARY KEY, task varchar(255) NOT NULL, project varchar(100) NOT NULL, user varchar(100), ip varchar(25), status varchar(100))")
 		db.commit()
 		db.close()
 	print ""

@@ -3,12 +3,17 @@
 
 import os
 import sys
-import argparse
+
+try:
+	import argparse
+except ImportError:
+	print "Missing needed module: easy_install argparse"
+	sys.exit()
 
 try:
 	import sqlite3
 except ImportError:
-	print 'need some sqlite3 module'
+	print 'Missing needed module: easy_install sqlite3'
 	sys.exit()
 
 def setup():
@@ -16,8 +21,10 @@ def setup():
 	opt_group = parser.add_mutually_exclusive_group()
 	opt_group.add_argument('-s', '--single', action='store', dest='sfile',  help='Add single file to database')
 	opt_group.add_argument('-f', '--folder', action='store', dest='folder', help='Add all files inside a folder to database')
+
 	
 	parser.add_argument('-d', '--database', action='store', dest='database', required=True, help='database file')
+	parser.add_argument('-p', '--project', action='store', dest='project', required=True, help='project')
 	
 	global args
 	args = parser.parse_args()
@@ -41,7 +48,7 @@ def main():
 				for root, dirs, files in os.walk(args.folder):
 					for f in files:
 						print "Adding %s..." % (f)
-						c.execute("INSERT INTO tasks (task,status) values ('%s','open')" % (f))
+						c.execute("INSERT INTO tasks (task, project, status) values ('%s', '%s', 'open')" % (f,args.project))
 			else:
 				print "folder doesnt exist..."
 		
