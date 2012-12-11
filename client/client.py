@@ -29,6 +29,7 @@ except ImportError:
 # Import possible project files
 # Code will be needed to args in setup() and and elseif in run_process()
 import projects.p80search
+import projects.sp1deep
 
 __author__ = 'Jaime Filson aka WiK'
 __license__ = 'BSD (3-Clause)'
@@ -70,9 +71,9 @@ def request_task():
 	socket.setdefaulttimeout(60)
 	try:
 		if args.debug:
-			print 'Attempting to connect to http://%s/gettask/%s' % (args.server,args.user)
+			print 'Attempting to connect to http://%s/gettask/%s/%s' % (args.server, args.user, args.project)
 	
-		res = urllib2.urlopen('http://%s/gettask/%s' % (args.server,args.user))
+		res = urllib2.urlopen('http://%s/gettask/%s/%s' % (args.server, args.user, args.project))
 	
 	except (urllib2.HTTPError, urllib2.URLError) as err:
 		print 'Server has not responded, please check your ip address'
@@ -118,6 +119,11 @@ def run_process(project,itm):
 		res = x.process_single(itm)
 		if res == True:
 			wanted_results.append(itm)
+	elif project == 'sp1deep':
+		x = projects.sp1deep.sp1deep()
+		res = x.process_single(itm)
+		for lnk in res:
+			wanted_results.append(lnk)
 
 def upload_results():
 	global f_name
@@ -250,7 +256,7 @@ def setup():
 	parser.add_argument('-w', '--wait', action='store', dest='wait', default=0, type=int, help='Wait time between tasks in seconds')
 	parser.add_argument('-s', '--server', action='store',dest='server', required=True, help='IP address of the server for tasks')
 	parser.add_argument('-u', '--user', action='store', dest='user', default='Anonymous', help='Username of helper')
-	parser.add_argument('-p', '--project', action='store', dest='project', choices=['p80search'], default='p80search', help='Project to run')
+	parser.add_argument('-p', '--project', action='store', dest='project', choices=['p80search','sp1deep'], default='p80search', help='Project to run')
 	
 	verbose_group = parser.add_mutually_exclusive_group()
 	verbose_group.add_argument('-d', '--debug', action='store_true', dest='debug', help='Show Debug Messages')
@@ -260,7 +266,7 @@ def setup():
 	args = parser.parse_args()
 	
 	try:
-		socket.inet_aton(args.server)
+		socket.inet_aton(args.server.split(':')[0])
 	except:
 		print 'Error: The ip address is not valid'
 		cleanup()

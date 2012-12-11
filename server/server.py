@@ -111,20 +111,22 @@ def cancel_task(taskname='None'):
 				db.close()
 				return "IPSNOMATCH"
 	
-@route('/gettask/<name>')
-def get_task(name='Anonymous'):
-	global db_name
-	db = sqlite3.connect(db_name)
-	t_name = ''.join(c for c in name if c in valid_chars)
-	c = db.cursor()
-	c.execute("SELECT task FROM tasks WHERE status = 'open' LIMIT 1")
-	result = c.fetchall()
-	c.execute("UPDATE tasks SET status = 'assigned', user = '%s', ip = '%s' where task = '%s'" % (t_name, request.environ.get('REMOTE_ADDR'), result[0][0]))
-	db.commit()
-	c.close()
-	db.close()
-	f_name = result[0][0]
-	return static_file(f_name, root='tasks/', download=f_name)
+@route('/gettask/<name>/<project>')
+def get_task(name='Anonymous',project='p80search'):
+	if project != 'None':
+		global db_name
+		db = sqlite3.connect(db_name)
+		t_name = ''.join(c for c in name if c in valid_chars)
+		t_proj = ''.join(c for c in project if c in valid_chars)
+		c = db.cursor()
+		c.execute("SELECT task FROM tasks WHERE project = '%s' AND status = 'open' LIMIT 1" % (t_proj))
+		result = c.fetchall()
+		c.execute("UPDATE tasks SET status = 'assigned', user = '%s', ip = '%s' where task = '%s'" % (t_name, request.environ.get('REMOTE_ADDR'), result[0][0]))
+		db.commit()
+		c.close()
+		db.close()
+		f_name = result[0][0]
+		return static_file(f_name, root='tasks/', download=f_name)
 
 @route('/')
 @route('/listtasks')
@@ -132,7 +134,7 @@ def list_tasks():
 	global db_name
 	db = sqlite3.connect(db_name)	
 	c = db.cursor()
-	c.execute("SELECT count(task) FROM tasks where status != 'finished'")
+	c.execute("SELECT project, count(task) FROM tasks WHERE status != 'finished' GROUP BY project")
 	result = c.fetchall()
 	c.close()
 	db.close()
