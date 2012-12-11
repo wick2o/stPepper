@@ -110,7 +110,8 @@ def cancel_task(taskname='None'):
 				c.close()
 				db.close()
 				return "IPSNOMATCH"
-	
+
+@route('/gettask/<name>')
 @route('/gettask/<name>/<project>')
 def get_task(name='Anonymous',project='p80search'):
 	if project != 'None':
