@@ -153,22 +153,7 @@ def progressbar(progress, total):
 	global args
 	if not args.quite:
 		progress_percentage = int(100 / (float(total) / float(progress)))
-		total = float(total)
-		#calculate progress for 25, 50, 75, and 99%
-		vals = [
-				int(total/100*10),
-				int(total/100*20),
-				int(total/100*30),
-				int(total/100*40),
-				int(total/100*50), 
-				int(total/100*60), 
-				int(total/100*70),
-				int(total/100*80),
-				int(total/100*90),				
-				int(total-1)
-				]
-		if progress in vals:
-			sys.stdout.write("%s %s%% complete\r" % (("#"*(progress_percentage / 10)), progress_percentage))
+		sys.stdout.write("%s%% complete\r" % (progress_percentage))
 
 def process_handler(task_data):
 	global args
