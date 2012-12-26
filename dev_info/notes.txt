@@ -6,7 +6,7 @@ for i in `dir fr.list.*`; do echo sqlite3 -line ../tasklist.db "INSERT INTO todo
 FOR /L %variable IN (start,step,end) DO command [command-parameters]
 
 cd fin
-for i in `ls *.done`; do rm ../tasks/${i:0:14}; done
+for i in `ls *.done`; do rm ../tasks/${i:0:${#i}-5}; done
 
 utils/zip_results.py -o /home/ubuntu/fin5.zip -f ./fin/
 
